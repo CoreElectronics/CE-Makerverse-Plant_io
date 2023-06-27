@@ -28,21 +28,20 @@ def main():
         "VOLTAGE": "Supply Voltage [V]",
     }
 
+    # Step 1: Initialise the logfile and Plant
+    logfile = DataLogger(
+        filename=LOG_FILENAME,
+        title_row=list(HEADING.values()),
+        period=PERIOD_MINUTES,
+    )  # Open the log file, this will only write the heading if the file was just created
+
+    plant = Plant_io()
+
+    # Change this to tune how moist the growing media should be.
+    # Use the results from test_moisture_sensor.py
+    plant.moisture_setpoint = 32
+
     while True:
-        # Step 1: Initialise the logfile and Plant
-
-        logfile = DataLogger(
-            filename=LOG_FILENAME,
-            title_row=list(HEADING.values()),
-            period=PERIOD_MINUTES,
-        )  # Open the log file, this will only write the heading if the file was just created
-
-        plant = Plant_io()
-
-        # Change this to tune how moist the growing media should be.
-        # Use the results from test_moisture_sensor.py
-        plant.moisture_setpoint = 32
-
         # Step 2: Collect some data to log
 
         soil_moisture = plant.measure_soil()

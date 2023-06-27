@@ -52,25 +52,25 @@ def main():
         "VOLTAGE": "Supply Voltage [V]",
     }
 
+    logfile = DataLogger(
+        filename=LOG_FILENAME,
+        title_row=(list(HEADING.values()) + CONNECTED_SENSORS),
+        period=PERIOD_MINUTES,
+    )  # Open the log file, this will only write the heading if the file was just created
+
+    plant = Plant_io()
+
+    # Change this to tune how moist the growing media should be.
+    # Use the results from test_moisture_sensor.py
+    plant.moisture_setpoint = 32
+
+    if CONNECTED_SENSORS:
+        print("Initialising PiicoDev modules")
+        for CONNECTED_SENSOR in CONNECTED_SENSORS:
+            plant.attach(CONNECTED_SENSOR)
+        print("")
+
     while True:
-        logfile = DataLogger(
-            filename=LOG_FILENAME,
-            title_row=(list(HEADING.values()) + CONNECTED_SENSORS),
-            period=PERIOD_MINUTES,
-        )  # Open the log file, this will only write the heading if the file was just created
-
-        plant = Plant_io()
-
-        # Change this to tune how moist the growing media should be.
-        # Use the results from test_moisture_sensor.py
-        plant.moisture_setpoint = 32
-
-        if CONNECTED_SENSORS:
-            print("Initialising PiicoDev modules")
-            for CONNECTED_SENSOR in CONNECTED_SENSORS:
-                plant.attach(CONNECTED_SENSOR)
-            print("")
-
         data = {HEADING["TIME"]: logfile.last_timestamp + PERIOD_MINUTES}
 
         soil_moisture = plant.measure_soil()
