@@ -212,7 +212,6 @@ class Plant_io:
         i2c = I2C(0, sda=Pin(8), scl=Pin(9))
         self.discovered_addresses = i2c.scan()
         self.attached_addresses = []
-        print(self.discovered_addresses)
 
     def sleep(self):
         self.done_pin.value(1)
