@@ -15,6 +15,7 @@ while True:
 
     ### Step 2: Collect some data to log
     soil_moisture = plant.measure_soil()
+    voltage = plant.measure_system_voltage()
 
     ### Step 3: Run the pump if plant requires water. This function uses soil moisture to decide whether to run the pump or not.
     pump_running_seconds = plant.run_pump_control()
@@ -33,17 +34,18 @@ while True:
     heading_time = 'Time [minutes]'
     heading_moisture = 'Moisture [%]'
     heading_pump = 'Pump Run [seconds]'
-    data_heading = [heading_time,heading_moisture, heading_pump] # The heading that will appear at the top of the log file
+    heading_voltage = 'Supply Voltage [V]'
+    data_heading = [heading_time, heading_moisture, heading_pump, heading_voltage] # The heading that will appear at the top of the log file
 
     logfile = DataLogger(file_name, data_heading) # Open the log file, and write the data_heading if the file was just created.
     timestamp = logfile.last_timestamp + period_minutes # get the most recent timestamp
 
     # Construct a data dictionary - dictionary keys match the data headings eg. {heading string : data to log}
-    data = {
-        heading_time     : timestamp,
-        heading_moisture : soil_moisture,
-        heading_pump     : pump_running_seconds
-        }
+    data = {heading_time        : timestamp,
+            heading_moisture    : soil_moisture,
+            heading_pump        : pump_running_seconds,
+            heading_voltage     : voltage,
+    }
 
     logfile.log_data(data)
     

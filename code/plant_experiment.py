@@ -15,25 +15,25 @@ while True:
     
     # Attach sensors. Comment-out any sensors you are not using.
     print("Initialising PiicoDev modules")
-    plant.attach('BME280')            # Atmospheric Sensor
-    #plant.attach('ENS160')            # Air-Quality Sensor
-    #plant.attach('VEML6040')          # Colour Sensor
-    #plant.attach('VEML6030', asw=1)   # Ambient Light Sensor
-    #plant.attach('VL53L1X')           # Laser Distance Sensor
-    #plant.attach('LIS3DH')            # 3-Axis Accelerometer
-    #plant.attach('QMC6310')           # 3-Axis Magnetometer
+#     plant.attach('BME280')            # Atmospheric Sensor
+#     plant.attach('ENS160')            # Air-Quality Sensor
+#     plant.attach('VEML6040')          # Colour Sensor
+#     plant.attach('VEML6030')          # Ambient Light Sensor
+#     plant.attach('VL53L1X')           # Laser Distance Sensor
+#     plant.attach('LIS3DH')            # 3-Axis Accelerometer
+#     plant.attach('QMC6310')           # 3-Axis Magnetometer
 
     print("")
 
     ### Step 2: Collect some data to log
     soil_moisture = plant.measure_soil()
-    soil_moisture = plant.measure_soil()
+    voltage = plant.measure_system_voltage()
 
 #     Ambient Light Sensor VEML6030
 #     lux = plant.VEML6030_light()
 # 
 #     Atmospheric Sensor BME280
-    temperature_C, pressure_Pa, humidity_RH = plant.BME280_weather()
+#     temperature_C, pressure_Pa, humidity_RH = plant.BME280_weather()
 # 
 #     Air-Quality Sensor ENS160
 #     ENS160_status, AQI, TVOC, eCO2 = plant.ENS160_air_quality()
@@ -62,7 +62,6 @@ while True:
     print(f'Moisture {soil_moisture:5.2f}%    Pump Time {pump_running_seconds:5.2f}s')
 
 
-
     ### Step 4: Log the data to a file
     period_minutes = 20 # The chosen interval time on the Makerverse Nano Power Timer
     file_name = 'log.txt'
@@ -72,10 +71,8 @@ while True:
     heading_time = 'Time [minutes]'
     heading_moisture = 'Moisture [%]'
     heading_pump = 'Pump Run [seconds]'
-    heading_temperature = 'Temperature [degC]'
-    heading_pressure = 'Pressure [Pa]'
-    heading_humidity = 'Humidity [%RH]'
-    data_heading = [heading_time,heading_moisture, heading_pump, heading_temperature, heading_pressure, heading_humidity] # The heading that will appear at the top of the log file
+    heading_voltage = 'Supply Voltage [V]'
+    data_heading = [heading_time,heading_moisture, heading_pump, heading_voltage] # The heading that will appear at the top of the log file
 
 
     logfile = DataLogger(file_name, data_heading) # Open the log file, and write the data_heading if the file was just created.
@@ -84,11 +81,9 @@ while True:
     # Construct a data dictionary - dictionary keys match the data headings eg. {heading string : data to log}
     # TODO: Add your sampled data here
     data = {heading_time        : timestamp,
-        heading_moisture    : soil_moisture,
-        heading_pump        : pump_running_seconds,
-        heading_temperature : temperature_C,
-        heading_pressure    : pressure_Pa,
-        heading_humidity    : humidity_RH,
+            heading_moisture    : soil_moisture,
+            heading_pump        : pump_running_seconds,
+            heading_voltage     : voltage,
         }
 
     logfile.log_data(data)

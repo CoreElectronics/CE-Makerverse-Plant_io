@@ -224,6 +224,7 @@ class Plant_io:
             else: addr = 0x48
             if self.is_address_collision(addr, 'VEML6030'): return
             self.veml6030 = PiicoDev_VEML6030(addr=addr)
+            self.veml6030.setGain(0.125)
             self.attached_addresses.append(addr)
             print_coloured(f"    Attached: PiicoDev Ambient Light Sensor VEML6030 at address {hex(addr)}", Colour.LIGHT_BLUE)
         except: pass
@@ -390,7 +391,7 @@ class Plant_io:
     
     def measure_system_voltage(self):
         """Voltage is measured through a 0.5x voltage divider"""
-        return 2 * voltage_pin.read_u16() * 3.3 / 65535
+        return 2 * self.voltage_pin.read_u16() * 3.3 / 65535
 
     @property
     def last_u_value(self):
