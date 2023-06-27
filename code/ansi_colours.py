@@ -1,8 +1,9 @@
 """
 ansi_colours.py
 
-Exports a class and function for storing ANSI colour codes
-and for using these codes to print in colour or with decoration
+Exports a class for storing ANSI colour codes
+and a method for using these codes to print in
+colour or with decoration
 """
 
 
