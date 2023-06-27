@@ -411,8 +411,8 @@ class DataLogger:
     def __init__(self, filename, title_row, period=1):
         self.filename = filename
         self.title_row = title_row
-        self.last_timestamp = 0
         self.period = period
+        self.last_timestamp = -self.period # initialises to zero after the first sample
                
         # Check if the file exists or not
         try:

@@ -37,7 +37,7 @@ while True:
     heading_voltage = 'Supply Voltage [V]'
     data_heading = [heading_time, heading_moisture, heading_pump, heading_voltage] # The heading that will appear at the top of the log file
 
-    logfile = DataLogger(file_name, data_heading) # Open the log file, and write the data_heading if the file was just created.
+    logfile = DataLogger(file_name, data_heading, period_minutes) # Open the log file, and write the data_heading if the file was just created.
     timestamp = logfile.last_timestamp + period_minutes # get the most recent timestamp
 
     # Construct a data dictionary - dictionary keys match the data headings eg. {heading string : data to log}
