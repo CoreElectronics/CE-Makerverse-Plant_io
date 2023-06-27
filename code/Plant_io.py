@@ -1,9 +1,16 @@
+"""
+Plant_io.py
+
+This module is the 
+"""
+
 from machine import Pin, ADC, PWM, I2C
 from utime import sleep
 from ucollections import namedtuple
 from math import nan
 from os import statvfs
 
+from ansi_colours import Colour, print_coloured
 
 try:
     from PiicoDev_BME280 import PiicoDev_BME280
@@ -33,43 +40,6 @@ try:
     from PiicoDev_QMC6310 import PiicoDev_QMC6310
 except ImportError:
     pass
-
-
-class Colour:
-    """ANSI color codes"""
-
-    BLACK = "\033[0;30m"
-    LIGHT_RED = "\033[0;31m"
-    LIGHT_GREEN = "\033[0;32m"
-    BROWN = "\033[0;33m"
-    LIGHT_BLUE = "\033[0;34m"
-    PURPLE = "\033[0;35m"
-    CYAN = "\033[0;36m"
-    LIGHT_GRAY = "\033[0;37m"
-    DARK_GRAY = "\033[1;30m"
-    RED = "\033[1;31m"
-    GREEN = "\033[1;32m"
-    YELLOW = "\033[1;33m"
-    BLUE = "\033[1;34m"
-    LIGHT_PURPLE = "\033[1;35m"
-    LIGHT_CYAN = "\033[1;36m"
-    LIGHT_WHITE = "\033[1;37m"
-    BOLD = "\033[1m"
-    FAINT = "\033[2m"
-    ITALIC = "\033[3m"
-    UNDERLINE = "\033[4m"
-    BLINK = "\033[5m"
-    NEGATIVE = "\033[7m"
-    CROSSED = "\033[9m"
-    END = "\033[0m"
-
-
-def print_coloured(val, colour=Colour.BLACK):
-    """
-    Calls print wrapped by ANSI color codes starting
-    with the specified color (default black)
-    """
-    print(colour + str(val) + Colour.END)
 
 
 class manager_funcs:
