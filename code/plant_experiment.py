@@ -43,7 +43,7 @@ def main():
 
     PERIOD_MINUTES = 20  # The chosen interval time on the Makerverse Nano Power Timer
     PERIOD_MS = round(1000 * 60 * PERIOD_MINUTES)
-    LOG_FILENAME = "log.txt"
+    LOG_FILENAME = "log.csv"
 
     HEADING = {
         "TIME": "Time [minutes]",
