@@ -4,13 +4,12 @@ Plant_io.py
 This module is the 
 """
 
-from machine import Pin, ADC, PWM, I2C
-from utime import sleep
-from ucollections import namedtuple
 from math import nan
 from os import statvfs
-
-from ansi_colours import Colours
+from utime import sleep
+from ucollections import namedtuple
+from machine import Pin, ADC, PWM, I2C
+from ansi_colours import Colours, colour_print
 
 try:
     from PiicoDev_BME280 import PiicoDev_BME280
@@ -42,72 +41,84 @@ except ImportError:
     pass
 
 
-class manager_funcs:
-    def map_range(self, x, in_min, in_max, out_min, out_max, ret_int):
-        mapped = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-        if ret_int:
-            return int(max(min(mapped, out_max), out_min))
-        else:
-            return max(min(mapped, out_max), out_min)
+def map_range(
+    x: float, in_min: float, in_max: float, out_min: float, out_max: float
+) -> float:
+    """
+    TODO: Describe the behaviour of the map_range function
+    """
+    return max(
+        min(
+            (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min,
+            out_max,
+        ),
+        out_min,
+    )
 
-    # Returns an list of
-    def read_file(self, filename):
-        try:
-            f = open(filename, "r")
-            cont = f.read()
-            f.close()
-            cont_lst = cont.split(",\n")
-            return [item for item in cont_lst if item]  # Removes any empty list items
-        except:
-            Colours.print("File not found, returning 0")
-            return 0
 
-    def log_and_create_file(self, filename, val):
-        with open(filename, "a") as f:
-            f.write("{:.2f},\n".format(val))
-        # f = open(filename, "a") # Creates or appends a file
-        # f.write(str(val) + ",\n")
-        # f.close()
+def get_csv_lines(filename: str) -> list(str):
+    """
+    Reads a CSV file at filename and returns a list
+    of strings if the file exists, or returns an empty list
+    """
+    try:
+        with open(filename, "r", encoding="utf-8") as file:
+            return [line for line in file.read().split(",\n") if line]
+    except FileNotFoundError:
+        colour_print(f"{filename} not found!", Colours.RED)
+        return []
 
-    def file2dict(self, filename):
-        read_lst = self.read_file(filename)
-        dict_ret = dict()
-        if read_lst == 0:  # If there was an error
-            return 0
-        else:
-            for item in read_lst:
-                str_splt = item.split(":")
-                dict_ret[str_splt[0]] = str_splt[1]
-            return dict_ret
 
-    def normalise_x(self, x, x_min, x_max):
-        return 100 - self.map_range(x, x_min, x_max, 0, 100, ret_int=False)
+def log_and_create_file(filename, val):
+    with open(filename, "a") as f:
+        f.write("{:.2f},\n".format(val))
+    # f = open(filename, "a") # Creates or appends a file
+    # f.write(str(val) + ",\n")
+    # f.close()
 
-    def peristaltic_wrapper(
-        self,
-        val,
-        debug=False,
-        min_servo_duty=1000,
-        max_servo_duty=8700,
-        duty_deadband_min=-70,
-        duty_deadband_max=50,
-    ):
+
+def file_to_dict(filename):
+    read_lst = read_file(filename)
+    dict_ret = {}
+    if read_lst == 0:  # If there was an error
+        return 0
+    else:
+        for item in read_lst:
+            str_splt = item.split(":")
+            dict_ret[str_splt[0]] = str_splt[1]
+        return dict_ret
+
+
+def normalise_x(self, x, x_min, x_max):
+    return 100 - self.map_range(x, x_min, x_max, 0, 100, ret_int=False)
+
+
+def peristaltic_wrapper(
+    self,
+    val,
+    debug=False,
+    min_servo_duty=1000,
+    max_servo_duty=8700,
+    duty_deadband_min=-70,
+    duty_deadband_max=50,
+):
+    ret = 0
+    if (val > duty_deadband_min) and (val < duty_deadband_max):
+        if debug:
+            colour_print("Stopping, Inside deadband", Colours.RED)
         ret = 0
-        if (val > duty_deadband_min) and (val < duty_deadband_max):
-            if debug:
-                Colours.print("Stopping, Inside deadband")
-            ret = 0
-        else:
-            ret = self.map_range(
-                val, -100, 100, min_servo_duty, max_servo_duty, ret_int=True
-            )
-        return ret
+    else:
+        ret = self.map_range(
+            val, -100, 100, min_servo_duty, max_servo_duty, ret_int=True
+        )
+    return ret
 
-    def last_sens_wrapper(self, sens_log_filename):
-        sens_lst = self.read_file(sens_log_filename)
-        if type(sens_lst) == int:
-            return 0
-        return float(sens_lst[-1])
+
+def last_sens_wrapper(sens_log_filename):
+    sens_lst = read_file(sens_log_filename)
+    if type(sens_lst) == int:
+        return 0
+    return float(sens_lst[-1])
 
 
 class data_funcs:
@@ -190,7 +201,7 @@ class Plant_io:
 
     def is_address_collision(self, address, name):
         if address in self.attached_addresses:
-            Colours.print(
+            colour_print(
                 f"Warning: Initialising {name} failed! A device is already initialised at the address {hex(address)}"
             )
             return True
@@ -198,7 +209,7 @@ class Plant_io:
 
     def attach_BME280(self, asw=0):
         if not (0x77 in self.discovered_addresses or 0x76 in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: BME280. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -206,7 +217,7 @@ class Plant_io:
             address = 0x77 if asw == 0 else 0x76
             self.bme280 = PiicoDev_BME280(address=address)
             self.attached_addresses.append(address)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev Atmospheric Sensor BME280 at address {hex(self.bme280.addr)}",
                 Colour.LIGHT_BLUE,
             )
@@ -215,7 +226,7 @@ class Plant_io:
 
     def attach_ENS160(self, asw=0):
         if not (0x53 in self.discovered_addresses or 0x52 in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: ENS160. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -225,7 +236,7 @@ class Plant_io:
                 return
             self.ens160 = PiicoDev_ENS160(address=address)
             self.attached_addresses.append(address)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev Air-Quality Sensor ENS160 at address {hex(self.ens160.address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -234,7 +245,7 @@ class Plant_io:
 
     def attach_VEML6030(self, asw=0):
         if not (0x48 in self.discovered_addresses or 0x10 in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: VEML6030. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -248,7 +259,7 @@ class Plant_io:
             self.veml6030 = PiicoDev_VEML6030(addr=addr)
             self.veml6030.setGain(0.125)
             self.attached_addresses.append(addr)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev Ambient Light Sensor VEML6030 at address {hex(addr)}",
                 Colour.LIGHT_BLUE,
             )
@@ -258,7 +269,7 @@ class Plant_io:
     def attach_VEML6040(self, **kwargs):
         address = 0x10
         if not (address in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: VEML6040. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -267,7 +278,7 @@ class Plant_io:
                 return
             self.veml6040 = PiicoDev_VEML6040()
             self.attached_addresses.append(address)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev Colour Sensor VEML6040 at address {hex(address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -277,7 +288,7 @@ class Plant_io:
     def attach_VL53L1X(self, asw=None):
         address = 0x29
         if not (address in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: VL53L1X. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -286,7 +297,7 @@ class Plant_io:
                 return
             self.vl53l1x = PiicoDev_VL53L1X()
             self.attached_addresses.append(address)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev Laser Distance Sensor VL53L1X at address {hex(address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -295,7 +306,7 @@ class Plant_io:
 
     def attach_LIS3DH(self, asw=0):
         if not (0x19 in self.discovered_addresses or 0x18 in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: LIS3DH. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -308,17 +319,17 @@ class Plant_io:
                 return
             self.lis3dh = PiicoDev_LIS3DH(address=addr)
             self.attached_addresses.append(addr)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev 3-Axis Accelerometer LIS3DH at address {hex(addr)}",
                 Colour.LIGHT_BLUE,
             )
         except Exception as e:
-            Colours.print(e)
+            colour_print(e)
 
     def attach_QMC6310(self, asw=None):
         address = 0x1C
         if not (address in self.discovered_addresses):
-            Colours.print(
+            colour_print(
                 "    Not Attached: QMC6310. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -327,7 +338,7 @@ class Plant_io:
                 return
             self.qmc6310 = PiicoDev_QMC6310()
             self.attached_addresses.append(address)
-            Colours.print(
+            colour_print(
                 f"    Attached: PiicoDev Magnetometer QMC6310 at address {hex(address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -347,7 +358,7 @@ class Plant_io:
         try:
             initialisation_function = candidates[part_ID]
         except KeyError as e:
-            Colours.print(
+            colour_print(
                 '.attach() was given an unrecognised ID: "{}"'.format(part_ID),
                 Colour.LIGHT_RED,
             )
@@ -358,7 +369,7 @@ class Plant_io:
         if hasattr(self, "veml6030"):
             return self.veml6030.read()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. VEML6030_light() not available: VEML6030 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -368,7 +379,7 @@ class Plant_io:
         if hasattr(self, "bme280"):
             return self.bme280.values()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. BME280_weather() not available: BME280 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -383,7 +394,7 @@ class Plant_io:
                 self.ens160.eco2,
             )
         else:
-            Colours.print(
+            colour_print(
                 "Warning. ENS160_air_quality() not available: ENS160 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -400,7 +411,7 @@ class Plant_io:
         if hasattr(self, "veml6040"):
             return self.veml6040.readRGB()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. VEML6040_RGB() not available: VEML6040 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -410,7 +421,7 @@ class Plant_io:
         if hasattr(self, "veml6040"):
             return self.veml6040.readHSV()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. VEML6040_HSV() not available: VEML6040 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -420,7 +431,7 @@ class Plant_io:
         if hasattr(self, "vl53l1x"):
             return self.vl53l1x.read()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. VL53L1X_distance() not available: VL53L1X not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -430,7 +441,7 @@ class Plant_io:
         if hasattr(self, "lis3dh"):
             return self.lis3dh.acceleration
         else:
-            Colours.print(
+            colour_print(
                 "Warning. LIS3DH_acceleration() not available: LIS3DH not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -441,7 +452,7 @@ class Plant_io:
         if hasattr(self, "qmc6310"):
             self.qmc6310.calibrate()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. () not available: QMC6310 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -450,7 +461,7 @@ class Plant_io:
         if hasattr(self, "qmc6310"):
             return self.qmc6310.read()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. QMC6310_flux() not available: QMC6310 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -460,7 +471,7 @@ class Plant_io:
         if hasattr(self, "qmc6310"):
             return self.qmc6310.readPolar()
         else:
-            Colours.print(
+            colour_print(
                 "Warning. QMC6310_polar() not available: QMC6310 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -485,7 +496,7 @@ class Plant_io:
     def run_pump_control(self, debug=False):
         self.u = controller.ctrl(self.curr_sens, self.moisture_setpoint)
         if debug:
-            Colours.print("Control value: ", self.u)
+            colour_print("Control value: ", self.u)
         controller.run_pump(self.mf, self.pump, self.u)
         return self.u
 
@@ -535,4 +546,4 @@ class DataLogger:
         free_space_Bytes = get_free_space_Bytes()
         line_size = len(data_string)
         lines_remaining = free_space_Bytes // line_size
-        Colours.print(f"Storage: Approx. {lines_remaining} Lines remaining")
+        colour_print(f"Storage: Approx. {lines_remaining} Lines remaining")
