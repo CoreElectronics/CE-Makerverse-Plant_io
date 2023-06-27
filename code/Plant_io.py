@@ -10,7 +10,7 @@ from ucollections import namedtuple
 from math import nan
 from os import statvfs
 
-from ansi_colours import Colors
+from ansi_colours import Colours
 
 try:
     from PiicoDev_BME280 import PiicoDev_BME280
@@ -59,7 +59,7 @@ class manager_funcs:
             cont_lst = cont.split(",\n")
             return [item for item in cont_lst if item]  # Removes any empty list items
         except:
-            Colors.print("File not found, returning 0")
+            Colours.print("File not found, returning 0")
             return 0
 
     def log_and_create_file(self, filename, val):
@@ -95,7 +95,7 @@ class manager_funcs:
         ret = 0
         if (val > duty_deadband_min) and (val < duty_deadband_max):
             if debug:
-                Colors.print("Stopping, Inside deadband")
+                Colours.print("Stopping, Inside deadband")
             ret = 0
         else:
             ret = self.map_range(
@@ -190,7 +190,7 @@ class Plant_io:
 
     def is_address_collision(self, address, name):
         if address in self.attached_addresses:
-            Colors.print(
+            Colours.print(
                 f"Warning: Initialising {name} failed! A device is already initialised at the address {hex(address)}"
             )
             return True
@@ -198,7 +198,7 @@ class Plant_io:
 
     def attach_BME280(self, asw=0):
         if not (0x77 in self.discovered_addresses or 0x76 in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: BME280. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -206,7 +206,7 @@ class Plant_io:
             address = 0x77 if asw == 0 else 0x76
             self.bme280 = PiicoDev_BME280(address=address)
             self.attached_addresses.append(address)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev Atmospheric Sensor BME280 at address {hex(self.bme280.addr)}",
                 Colour.LIGHT_BLUE,
             )
@@ -215,7 +215,7 @@ class Plant_io:
 
     def attach_ENS160(self, asw=0):
         if not (0x53 in self.discovered_addresses or 0x52 in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: ENS160. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -225,7 +225,7 @@ class Plant_io:
                 return
             self.ens160 = PiicoDev_ENS160(address=address)
             self.attached_addresses.append(address)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev Air-Quality Sensor ENS160 at address {hex(self.ens160.address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -234,7 +234,7 @@ class Plant_io:
 
     def attach_VEML6030(self, asw=0):
         if not (0x48 in self.discovered_addresses or 0x10 in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: VEML6030. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -248,7 +248,7 @@ class Plant_io:
             self.veml6030 = PiicoDev_VEML6030(addr=addr)
             self.veml6030.setGain(0.125)
             self.attached_addresses.append(addr)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev Ambient Light Sensor VEML6030 at address {hex(addr)}",
                 Colour.LIGHT_BLUE,
             )
@@ -258,7 +258,7 @@ class Plant_io:
     def attach_VEML6040(self, **kwargs):
         address = 0x10
         if not (address in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: VEML6040. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -267,7 +267,7 @@ class Plant_io:
                 return
             self.veml6040 = PiicoDev_VEML6040()
             self.attached_addresses.append(address)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev Colour Sensor VEML6040 at address {hex(address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -277,7 +277,7 @@ class Plant_io:
     def attach_VL53L1X(self, asw=None):
         address = 0x29
         if not (address in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: VL53L1X. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -286,7 +286,7 @@ class Plant_io:
                 return
             self.vl53l1x = PiicoDev_VL53L1X()
             self.attached_addresses.append(address)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev Laser Distance Sensor VL53L1X at address {hex(address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -295,7 +295,7 @@ class Plant_io:
 
     def attach_LIS3DH(self, asw=0):
         if not (0x19 in self.discovered_addresses or 0x18 in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: LIS3DH. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -308,17 +308,17 @@ class Plant_io:
                 return
             self.lis3dh = PiicoDev_LIS3DH(address=addr)
             self.attached_addresses.append(addr)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev 3-Axis Accelerometer LIS3DH at address {hex(addr)}",
                 Colour.LIGHT_BLUE,
             )
         except Exception as e:
-            Colors.print(e)
+            Colours.print(e)
 
     def attach_QMC6310(self, asw=None):
         address = 0x1C
         if not (address in self.discovered_addresses):
-            Colors.print(
+            Colours.print(
                 "    Not Attached: QMC6310. Skipping this device", Colour.LIGHT_RED
             )
             return
@@ -327,7 +327,7 @@ class Plant_io:
                 return
             self.qmc6310 = PiicoDev_QMC6310()
             self.attached_addresses.append(address)
-            Colors.print(
+            Colours.print(
                 f"    Attached: PiicoDev Magnetometer QMC6310 at address {hex(address)}",
                 Colour.LIGHT_BLUE,
             )
@@ -347,7 +347,7 @@ class Plant_io:
         try:
             initialisation_function = candidates[part_ID]
         except KeyError as e:
-            Colors.print(
+            Colours.print(
                 '.attach() was given an unrecognised ID: "{}"'.format(part_ID),
                 Colour.LIGHT_RED,
             )
@@ -358,7 +358,7 @@ class Plant_io:
         if hasattr(self, "veml6030"):
             return self.veml6030.read()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. VEML6030_light() not available: VEML6030 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -368,7 +368,7 @@ class Plant_io:
         if hasattr(self, "bme280"):
             return self.bme280.values()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. BME280_weather() not available: BME280 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -383,7 +383,7 @@ class Plant_io:
                 self.ens160.eco2,
             )
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. ENS160_air_quality() not available: ENS160 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -400,7 +400,7 @@ class Plant_io:
         if hasattr(self, "veml6040"):
             return self.veml6040.readRGB()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. VEML6040_RGB() not available: VEML6040 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -410,7 +410,7 @@ class Plant_io:
         if hasattr(self, "veml6040"):
             return self.veml6040.readHSV()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. VEML6040_HSV() not available: VEML6040 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -420,7 +420,7 @@ class Plant_io:
         if hasattr(self, "vl53l1x"):
             return self.vl53l1x.read()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. VL53L1X_distance() not available: VL53L1X not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -430,7 +430,7 @@ class Plant_io:
         if hasattr(self, "lis3dh"):
             return self.lis3dh.acceleration
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. LIS3DH_acceleration() not available: LIS3DH not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -441,7 +441,7 @@ class Plant_io:
         if hasattr(self, "qmc6310"):
             self.qmc6310.calibrate()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. () not available: QMC6310 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -450,7 +450,7 @@ class Plant_io:
         if hasattr(self, "qmc6310"):
             return self.qmc6310.read()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. QMC6310_flux() not available: QMC6310 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -460,7 +460,7 @@ class Plant_io:
         if hasattr(self, "qmc6310"):
             return self.qmc6310.readPolar()
         else:
-            Colors.print(
+            Colours.print(
                 "Warning. QMC6310_polar() not available: QMC6310 not initialised/connected",
                 Colour.LIGHT_RED,
             )
@@ -485,7 +485,7 @@ class Plant_io:
     def run_pump_control(self, debug=False):
         self.u = controller.ctrl(self.curr_sens, self.moisture_setpoint)
         if debug:
-            Colors.print("Control value: ", self.u)
+            Colours.print("Control value: ", self.u)
         controller.run_pump(self.mf, self.pump, self.u)
         return self.u
 
@@ -535,4 +535,4 @@ class DataLogger:
         free_space_Bytes = get_free_space_Bytes()
         line_size = len(data_string)
         lines_remaining = free_space_Bytes // line_size
-        Colors.print(f"Storage: Approx. {lines_remaining} Lines remaining")
+        Colours.print(f"Storage: Approx. {lines_remaining} Lines remaining")
