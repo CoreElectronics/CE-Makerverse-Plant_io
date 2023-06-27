@@ -15,6 +15,15 @@ class Colours:
     def __str__(self):
         return str.__str__(self)
 
+    def print(self, val, colour=None):
+        """
+        Wraps print with ANSI color codes starting
+        with the specified color (default of black)
+        """
+        if colour is None:
+            colour = self.BLACK
+        print(f"{colour}{str(val)}{self.END}")
+
     BLACK = "\033[0;30m"
     LIGHT_RED = "\033[0;31m"
     LIGHT_GREEN = "\033[0;32m"
@@ -39,11 +48,3 @@ class Colours:
     NEGATIVE = "\033[7m"
     CROSSED = "\033[9m"
     END = "\033[0m"
-
-
-def print_coloured(val, colour=Colours.BLACK):
-    """
-    Calls print wrapped by ANSI color codes starting
-    with the specified color (default of black)
-    """
-    print(f"{colour}{str(val)}{Colours.END}")
