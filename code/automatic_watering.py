@@ -55,8 +55,8 @@ def main():
 
         # Step 4: Print, then log the data to a file
 
-        print(f"Moisture {soil_moisture:5.2f}%", end="")
-        print(f"Pump Time {pump_running_seconds:5.2f}s", end="")
+        print(f"Moisture {soil_moisture:5.2f}%")
+        print(f"Pump Time {pump_running_seconds:5.2f}s")
 
         logfile.log_data(
             {
