@@ -15,7 +15,7 @@ def main():
     """
     plant = Plant_io()
     while True:
-        print(f"moisture {plant.measure_soil():5.2f}%")
+        print(f"Moisture {plant.measure_soil():5.2f}%")
         sleep_ms(100)
 
 
