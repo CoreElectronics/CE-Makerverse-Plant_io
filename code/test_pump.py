@@ -9,9 +9,10 @@ from plant_io import PlantIO
 
 def main():
     """
-    Calls drive_pump_for_seconds(3) on a new PlantIO instance
+    Calls run_pump(3000.0) on a new PlantIO instance to run the pump
+    for 3000ms or 3s
     """
-    PlantIO().drive_pump_for_seconds(3)
+    PlantIO().run_pump(3000.0)
 
 
 if __name__ == "__main__":

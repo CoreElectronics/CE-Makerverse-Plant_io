@@ -53,45 +53,43 @@ def main():
     }
 
     logfile = DataLogger(
-        filename=LOG_FILENAME,
-        title_row=(list(HEADING.values()) + CONNECTED_SENSORS),
-        period=PERIOD_MINUTES,
+        filename=LOG_FILENAME, title_row=(list(HEADING.values()) + CONNECTED_SENSORS)
     )  # Open the log file, this will only write the heading if the file was just created
 
-    plant = PlantIO()
+    plantIO = PlantIO()
 
     # Change this to tune how moist the growing media should be.
     # Use the results from test_moisture_sensor.py
-    plant.moisture_setpoint = 32
+    plantIO.moisture_setpoint = 32
 
     if CONNECTED_SENSORS:
         print("Initialising PiicoDev modules")
         for CONNECTED_SENSOR in CONNECTED_SENSORS:
-            plant.attach(CONNECTED_SENSOR)
+            plantIO.attach_piicodev_module(CONNECTED_SENSOR)
         print("")
 
     while True:
         data = {HEADING["TIME"]: logfile.last_timestamp + PERIOD_MINUTES}
 
-        soil_moisture = plant.measure_soil()
+        soil_moisture = plantIO.measure_soil()
         print(f"Moisture {soil_moisture:5.2f}%", end="")
         data[HEADING["MOISTURE"]] = soil_moisture
 
-        voltage = plant.measure_system_voltage()
+        voltage = plantIO.measure_system_voltage()
         print(f"    Voltage {voltage:5.2f}%", end="")
         data[HEADING["VOLTAGE"]] = voltage
 
-        pump_running_seconds = plant.run_pump_control()
+        pump_running_seconds = plantIO.run_pump_control()
         print(f"    Pump Time {pump_running_seconds:5.2f}s", end="")
         data[HEADING["PUMP"]] = pump_running_seconds
 
         if "VEML6030" in CONNECTED_SENSORS:
-            lux = plant.VEML6030_light()
+            lux = plantIO.VEML6030_light()
             print(f"    Light Level {lux:5.2f} lux")
             data["Light Level [lux]"] = lux
 
         if "BME280" in CONNECTED_SENSORS:
-            temperature_c, pressure_pa, humidity_rh = plant.BME280_weather()
+            temperature_c, pressure_pa, humidity_rh = plantIO.BME280_weather()
             print(f"    Temperature {temperature_c:5.2f} Celsius")
             data["Temperature [C]"] = temperature_c
             print(f"    Pressure {pressure_pa:5.2f} Pascals")
@@ -100,7 +98,7 @@ def main():
             data["Humidity [RH]"] = humidity_rh
 
         if "ENS160" in CONNECTED_SENSORS:
-            _, aqi, tvoc, eco2 = plant.ENS160_air_quality()
+            _, aqi, tvoc, eco2 = plantIO.ENS160_air_quality()
             print(f"    AQI {aqi:5.2f}")
             data["AQI"] = aqi
             print(f"    TVOC {tvoc:5.2f} ppb")
@@ -109,28 +107,28 @@ def main():
             data["eCO2 [ppm]"] = eco2
 
         if "VEML6040" in CONNECTED_SENSORS:
-            hsv = plant.VEML6040_HSV()
-            rgb = plant.VEML6040_RGB()
+            hsv = plantIO.VEML6040_HSV()
+            rgb = plantIO.VEML6040_RGB()
             print(f"    HSV {hsv}")
             data["HSV"] = hsv
             print(f"    RGB {rgb}")
             data["RGB"] = rgb
 
         if "VL53L1X" in CONNECTED_SENSORS:
-            distance_mm = plant.VL53L1X_distance()
+            distance_mm = plantIO.VL53L1X_distance()
             print(f"    Distance {distance_mm:5.2f} mm")
             data["Distance [mm]"] = distance_mm
 
         if "LIS3DH" in CONNECTED_SENSORS:
-            acceleration = plant.LIS3DH_acceleration()
+            acceleration = plantIO.LIS3DH_acceleration()
             print(f"    Acceleration {acceleration} m/s/s")
             data["Acceleration [m/s/s]"] = acceleration
 
         if "QMC6310" in CONNECTED_SENSORS:
             # Should only need to run once. Can be commented out once calibration is complete.
-            plant.QMC6310_calibrate()
-            flux = plant.QMC6310_flux()
-            polar = plant.QMC6310_polar()
+            plantIO.QMC6310_calibrate()
+            flux = plantIO.QMC6310_flux()
+            polar = plantIO.QMC6310_polar()
             print(f"    Flux {flux}")
             data["Flux"] = flux
             print(f"    Polar {polar}")
@@ -141,7 +139,7 @@ def main():
         # Signals to the Makerverse Nano Power Timer that we are DONE!
         # This removes power from the project until the next timer interval
         # unless USB power is supplied
-        plant.sleep()
+        plantIO.sleep()
 
         # If we are running from USB power then power will never be removed
         # by the Nano Power Timer. Instead we can just insert a delay. When powered

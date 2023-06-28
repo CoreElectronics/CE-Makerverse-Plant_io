@@ -30,27 +30,25 @@ def main():
 
     # Step 1: Initialise the logfile and Plant
     logfile = DataLogger(
-        filename=LOG_FILENAME,
-        title_row=list(HEADING.values()),
-        period=PERIOD_MINUTES,
+        filename=LOG_FILENAME, title_row=list(HEADING.values())
     )  # Open the log file, this will only write the heading if the file was just created
 
-    plant = PlantIO()
+    plantIO = PlantIO()
 
     # Change this to tune how moist the growing media should be.
     # Use the results from test_moisture_sensor.py
-    plant.moisture_setpoint = 32
+    plantIO.moisture_setpoint = 32
 
     while True:
         # Step 2: Collect some data to log
 
-        soil_moisture = plant.measure_soil()
-        voltage = plant.measure_system_voltage()
+        soil_moisture = plantIO.measure_soil()
+        voltage = plantIO.measure_system_voltage()
 
         # Step 3: Run the pump if plant requires water.
         # This function uses soil moisture to decide whether to run the pump or not.
 
-        pump_running_seconds = plant.run_pump_control()
+        pump_running_seconds = plantIO.run_pump_control()
 
         # Step 4: Print, then log the data to a file
 
@@ -69,7 +67,7 @@ def main():
         # Step 5: Signal to the Makerverse Nano Power Timer that we are DONE!
         # This removes power from the project until the next timer interval
         # unless USB power is supplied
-        plant.sleep()
+        plantIO.sleep()
 
         # Step 6: If we are running from USB power then power will never be removed
         # by the Nano Power Timer. Instead we can just insert a delay. When powered

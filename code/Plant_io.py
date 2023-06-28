@@ -498,11 +498,11 @@ A device is already initialised at the address {hex(address)}""",
         """Voltage is measured through a 0.5x voltage divider"""
         return 2 * self.voltage_pin.read_u16() * 3.3 / 65535
 
-    def run_pump(self, duration):
+    def run_pump(self, duration_ms: float):
         """
         Calls the pump_run method on the connected pump
         """
-        pump_run(self.pump, duration)
+        pump_run(self.pump, duration_ms)
 
     @property
     def last_u_value(self):

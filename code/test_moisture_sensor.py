@@ -13,9 +13,9 @@ def main():
     """
     Every 100ms print the measured soil moisture
     """
-    plant = PlantIO()
+    plantIO = PlantIO()
     while True:
-        print(f"Moisture {plant.measure_soil():5.2f}%")
+        print(f"Moisture {plantIO.measure_soil():5.2f}%")
         sleep_ms(100)
 
 
