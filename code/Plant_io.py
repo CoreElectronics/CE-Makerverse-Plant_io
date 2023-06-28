@@ -10,7 +10,7 @@ from ucollections import namedtuple
 from machine import Pin, ADC, PWM, I2C
 from ansi_colours import Colours, colour_print
 
-if uname().sysname is "Linux":
+if uname().sysname == "Linux":
     from time import sleep
 
     def sleep_ms(duration_ms):
@@ -75,7 +75,7 @@ def get_csv_lines(filename: str) -> list(str):
     try:
         with open(filename, "r", encoding="utf-8") as file:
             return [line for line in file.read().split(",\n") if line]
-    except FileNotFoundError:
+    except OSError:
         colour_print(f"{filename} not found!", Colours.RED)
         return []
 
@@ -169,7 +169,7 @@ class DataModel:
         """
         measurement = callable_measurement_function()
         self.moving_average_sum -= self.measurement_window.pop(0)
-        self.measurement_window.append()
+        self.measurement_window.append(measurement)
         self.moving_average_sum += measurement
         return int(self.moving_average_sum / self.size)
 
@@ -191,7 +191,7 @@ def pump_run(pump, duration_ms, speed=100):
     speed for the provided duration in milliseconds
     """
     pump.duty_u16(peristaltic_wrapper(speed))
-    sleep_ms(duration_ms)
+    sleep_ms(int(duration_ms))
     pump.duty_u16(peristaltic_wrapper(0))
 
 
@@ -534,7 +534,7 @@ class DataLogger:
             with open(filename, "r", encoding="utf-8") as file:
                 last_line = file.readlines()[-1]
                 self.last_timestamp = float(last_line.split(",")[0])
-        except FileNotFoundError:
+        except OSError:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write(",".join(self.title_row) + "\n")
                 self.last_timestamp = 0.0

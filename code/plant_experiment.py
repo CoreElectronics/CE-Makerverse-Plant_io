@@ -20,8 +20,20 @@ PlantIO removes a lot of setup complexity from PiicoDev
 but is only compatible with select modules.
 """
 
-from time import sleep_ms
+from os import uname
 from plant_io import PlantIO, DataLogger
+
+if uname().sysname == "Linux":
+    from time import sleep
+
+    def sleep_ms(duration_ms):
+        """
+        Block for duration_ms milliseconds
+        """
+        sleep(float(duration_ms) / 1000.0)
+
+else:
+    from utime import sleep_ms
 
 
 def main():
