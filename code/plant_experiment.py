@@ -1,7 +1,7 @@
 """
 plant_experiment.py
 
-Requires Plant_io.py module for interfacing with the pump,
+Requires PlantIO.py module for interfacing with the pump,
 moisture sensor, and performing file datalogging
 
 This module performs simple automatic irrigation based on
@@ -16,12 +16,12 @@ Laser Distance Sensor
 3-Axis Accelerometer
 3-Axis Magnetometer
 
-Plant_io removes a lot of setup complexity from PiicoDev
+PlantIO removes a lot of setup complexity from PiicoDev
 but is only compatible with select modules.
 """
 
 from time import sleep_ms
-from Plant_io import Plant_io, DataLogger
+from plant_io import PlantIO, DataLogger
 
 
 def main():
@@ -58,7 +58,7 @@ def main():
         period=PERIOD_MINUTES,
     )  # Open the log file, this will only write the heading if the file was just created
 
-    plant = Plant_io()
+    plant = PlantIO()
 
     # Change this to tune how moist the growing media should be.
     # Use the results from test_moisture_sensor.py

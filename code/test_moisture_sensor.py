@@ -6,14 +6,14 @@ the sensor placement and make sure the sensor is working properly
 """
 
 from time import sleep_ms
-from Plant_io import Plant_io
+from plant_io import PlantIO
 
 
 def main():
     """
     Every 100ms print the measured soil moisture
     """
-    plant = Plant_io()
+    plant = PlantIO()
     while True:
         print(f"Moisture {plant.measure_soil():5.2f}%")
         sleep_ms(100)

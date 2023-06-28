@@ -4,14 +4,14 @@ test_pump.py
 Run the pump for 3s
 """
 
-from Plant_io import Plant_io
+from plant_io import PlantIO
 
 
 def main():
     """
-    Calls drive_pump_for_seconds(3) on a new Plant_io instance
+    Calls drive_pump_for_seconds(3) on a new PlantIO instance
     """
-    Plant_io().drive_pump_for_seconds(3)
+    PlantIO().drive_pump_for_seconds(3)
 
 
 if __name__ == "__main__":
