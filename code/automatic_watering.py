@@ -1,61 +1,91 @@
-# This project requires the Plant_io module which handles
-# - Interfacing with electronics (pump, moisture sensor)
-# - Datalogging to a file
-#
-# This code will run simple automatic irrigation based on soil moisture
+"""
+automatic_watering.py
 
-from time import sleep_ms
-from Plant_io import Plant_io, DataLogger
+Requires PlantIO.py module for interfacing with the pump,
+moisture sensor and performing file datalogging
 
+This module performs simple automatic irrigation based on
+soil moisture
+"""
 
-while True:
-    ### Step 1: Initialise the Plant
-    plant = Plant_io()
-    plant.moisture_setpoint = 32 # change this to tune how moist the growing media should be. Use the results from test_moisture_sensor.py
+from os import uname
+from plant_io import PlantIO, DataLogger
 
-    ### Step 2: Collect some data to log
-    soil_moisture = plant.measure_soil()
-    voltage = plant.measure_system_voltage()
+if uname().sysname == "Linux":
+    from time import sleep
 
-    ### Step 3: Run the pump if plant requires water. This function uses soil moisture to decide whether to run the pump or not.
-    pump_running_seconds = plant.run_pump_control()
+    def sleep_ms(duration_ms):
+        """
+        Block for duration_ms milliseconds
+        """
+        sleep(float(duration_ms) / 1000.0)
 
-    # Print some debugging information
-    print(f'Moisture {soil_moisture:5.2f}%    Pump Time {pump_running_seconds:5.2f}s')
-
-
+else:
+    from utime import sleep_ms
 
 
-    ### Step 4: Log the data to a file
-    period_minutes = 20 # The chosen interval time on the Makerverse Nano Power Timer
-    file_name = 'log.txt'
+def main():
+    """
+    Every 20-minutes read and print and log the soil moisture, pump time, and voltage
+    """
 
-    # These are the labels that appear at the top of each data column in the log.txt file
-    heading_time = 'Time [minutes]'
-    heading_moisture = 'Moisture [%]'
-    heading_pump = 'Pump Run [seconds]'
-    heading_voltage = 'Supply Voltage [V]'
-    data_heading = [heading_time, heading_moisture, heading_pump, heading_voltage] # The heading that will appear at the top of the log file
+    PERIOD_MINUTES = 20  # The chosen interval time on the Makerverse Nano Power Timer
+    PERIOD_MS = round(1000 * 60 * PERIOD_MINUTES)
+    LOG_FILENAME = "log.csv"
 
-    logfile = DataLogger(file_name, data_heading, period_minutes) # Open the log file, and write the data_heading if the file was just created.
-    timestamp = logfile.last_timestamp + period_minutes # get the most recent timestamp
-
-    # Construct a data dictionary - dictionary keys match the data headings eg. {heading string : data to log}
-    data = {heading_time        : timestamp,
-            heading_moisture    : soil_moisture,
-            heading_pump        : pump_running_seconds,
-            heading_voltage     : voltage,
+    HEADING = {
+        "TIME": "Time [minutes]",
+        "MOISTURE": "Moisture [%]",
+        "PUMP": "Pump Run [seconds]",
+        "VOLTAGE": "Supply Voltage [V]",
     }
 
-    logfile.log_data(data)
-    
-    
-    ### Step 5: Signal to the Makerverse Nano Power Timer that we are DONE!
-    # This removes power from the project until the next timer interval
-    plant.sleep()
-    
-    ### Step 6: If we are running from USB power then power will never be removed by the Nano Power Timer.
-    # Instead we can just insert a delay. When powered only by batteries, this code will never run.
-    sleep_ms(round(1000*60*period_minutes))
-    
+    # Step 1: Initialise the logfile and Plant
+    logfile = DataLogger(
+        filename=LOG_FILENAME, title_row=list(HEADING.values())
+    )  # Open the log file, this will only write the heading if the file was just created
 
+    plantIO = PlantIO()
+
+    # Change this to tune how moist the growing media should be.
+    # Use the results from test_moisture_sensor.py
+    plantIO.moisture_setpoint = 32
+
+    while True:
+        # Step 2: Collect some data to log
+
+        soil_moisture = plantIO.measure_soil()
+        voltage = plantIO.measure_system_voltage()
+
+        # Step 3: Run the pump if plant requires water.
+        # This function uses soil moisture to decide whether to run the pump or not.
+
+        pump_running_seconds = plantIO.run_pump_control()
+
+        # Step 4: Print, then log the data to a file
+
+        print(f"Moisture {soil_moisture:5.2f}%")
+        print(f"Pump Time {pump_running_seconds:5.2f}s")
+
+        logfile.log_data(
+            {
+                HEADING["TIME"]: logfile.last_timestamp + PERIOD_MINUTES,
+                HEADING["MOISTURE"]: soil_moisture,
+                HEADING["PUMP"]: pump_running_seconds,
+                HEADING["VOLTAGE"]: voltage,
+            }
+        )
+
+        # Step 5: Signal to the Makerverse Nano Power Timer that we are DONE!
+        # This removes power from the project until the next timer interval
+        # unless USB power is supplied
+        plantIO.sleep()
+
+        # Step 6: If we are running from USB power then power will never be removed
+        # by the Nano Power Timer. Instead we can just insert a delay. When powered
+        # only by batteries, this code will never run.
+        sleep_ms(PERIOD_MS)
+
+
+if __name__ == "__main__":
+    main()

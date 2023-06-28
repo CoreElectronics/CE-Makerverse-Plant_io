@@ -1,9 +1,9 @@
-# Makerverse™ Plant_io™ Project Files
+# Makerverse™ PlantIO™ Project Files
 
-This is the hardware and firmware repo for the [Core Electronics Makerverse Plant_io Project](https://core-electronics.com.au/guides/plant-io/)
+This is the hardware and firmware repo for the [Core Electronics Makerverse PlantIO Project](https://core-electronics.com.au/guides/plant-io/)
 
-- **[code](./code)** contains all the Python source code required to run the Plant_io project
-- **[platform](./platform)** contains lasercutting files to cut your own Plant_io platform. You may wish to modify these to suit your own project needs.
+- **[code](./code)** contains all the Python source code required to run the PlantIO project
+- **[platform](./platform)** contains lasercutting files to cut your own PlantIO platform. You may wish to modify these to suit your own project needs.
 
 
 # License
@@ -15,6 +15,6 @@ If you have any technical questions, or concerns about licensing, please contact
 
 *The following are trademarks of Core Electronics Pty Ltd.*
 
-- *\"Plant_io\" and the Plant_io logo*
+- *\"PlantIO\" and the PlantIO logo*
 - *\"Makerverse\" and the Makerverse logo*
 - *\"PiicoDev\" and the PiicoDev logo*

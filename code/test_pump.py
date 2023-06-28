@@ -1,11 +1,19 @@
-# Test the Peristaltic Pump
-# This script simply prints the pump for 3 seconds
+"""
+test_pump.py
 
-from Plant_io import Plant_io
+Run the pump for 3s
+"""
 
-# Initialise the Plant_io controller (pump)
-plant = Plant_io()
+from plant_io import PlantIO
 
-# Run the pump for a short period
-plant.drive_pump_for_seconds(3)
 
+def main():
+    """
+    Calls run_pump(3000.0) on a new PlantIO instance to run the pump
+    for 3000ms or 3s
+    """
+    PlantIO().run_pump(3000.0)
+
+
+if __name__ == "__main__":
+    main()

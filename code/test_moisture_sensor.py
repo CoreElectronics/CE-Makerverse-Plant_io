@@ -1,14 +1,35 @@
-# Test the Soil Moisture Sensor
-# This script simply prints the soil moisture to the shell so you can experiment with
-# the sensor placement and make sure the sensor is working properly.
+"""
+test_moisture_sensor.py
 
-from time import sleep_ms
-from Plant_io import Plant_io
+Simply print the soil moisture to the shell every 100ms so you can experiment with
+the sensor placement and make sure the sensor is working properly
+"""
 
-# Initialise the Plant_io controller
-plant = Plant_io() 
+from os import uname
+from plant_io import PlantIO
 
-while True:
-    current_soil_moisture = plant.measure_soil()
-    print(f'moisture {current_soil_moisture:5.2f}%')
-    sleep_ms(100)
+if uname().sysname == "Linux":
+    from time import sleep
+
+    def sleep_ms(duration_ms):
+        """
+        Block for duration_ms milliseconds
+        """
+        sleep(float(duration_ms) / 1000.0)
+
+else:
+    from utime import sleep_ms
+
+
+def main():
+    """
+    Every 100ms print the measured soil moisture
+    """
+    plantIO = PlantIO()
+    while True:
+        print(f"Moisture {plantIO.measure_soil():5.2f}%")
+        sleep_ms(100)
+
+
+if __name__ == "__main__":
+    main()
