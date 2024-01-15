@@ -52,6 +52,11 @@ def print_coloured(string, colour=Colour.BLACK):
     print(colour + string + Colour.END)
 
 class manager_funcs:
+
+    def __init__(self, mini=10_000, maxi=50_000):
+        self.min = mini
+        self.max = maxi
+
     def map_range(self, x, in_min, in_max, out_min, out_max, ret_int):
         mapped = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
         if ret_int:
@@ -89,8 +94,10 @@ class manager_funcs:
                 dict_ret[str_splt[0]] = str_splt[1]
             return dict_ret
 
-    def normalise_x(self,x,x_min,x_max):
-        return (100 - self.map_range(x, x_min, x_max, 0, 100, ret_int=False))
+    def normalise_x(self,x):
+        self.min = self.min if x > self.min else x
+        self.max = self.max if x < self.max else x
+        return (100 - self.map_range(x, self.min, self.max, 0, 100, ret_int=False))
     
     def peristaltic_wrapper(self, val,debug=False,min_servo_duty = 1000, max_servo_duty = 8700,duty_deadband_min = -70,duty_deadband_max = 50):
         ret = 0
@@ -373,7 +380,7 @@ class Plant_io:
             sleep(0.05)
         soil_adc_reading = self.soil.read_u16()
         moving_ave = self.df.run_mov_ave(soil_adc_reading)
-        self.curr_sens = self.mf.normalise_x(moving_ave, 10_000, 50_000)
+        self.curr_sens = self.mf.normalise_x(moving_ave)
         return self.curr_sens
     
     def run_pump_control(self,debug=False):
