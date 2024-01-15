@@ -367,20 +367,13 @@ class Plant_io:
             print_coloured("Warning. QMC6310_polar() not available: QMC6310 not initialised/connected", Colour.LIGHT_RED)
             return {'polar':_NAN, 'Gauss':_NAN, 'uT':_NAN}
     
-#     def measure_soil(self):
-#         soil_adc_reading = self.soil.read_u16()
-#         moving_ave = self.df.run_mov_ave(soil_adc_reading)
-#         self.curr_sens = self.mf.normalise_x(moving_ave, 27500, 50000)
-#         
-#         prev_sens = self.mf.last_sens_wrapper(self.log_filename)
-#         return self.curr_sens, prev_sens
     def measure_soil(self):
         for _ in range(5):
             self.soil.read_u16()
             sleep(0.05)
         soil_adc_reading = self.soil.read_u16()
         moving_ave = self.df.run_mov_ave(soil_adc_reading)
-        self.curr_sens = self.mf.normalise_x(moving_ave, 27500, 50000)
+        self.curr_sens = self.mf.normalise_x(moving_ave, 10_000, 50_000)
         return self.curr_sens
     
     def run_pump_control(self,debug=False):
